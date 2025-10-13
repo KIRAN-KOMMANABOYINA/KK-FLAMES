@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>❤️ FLAMES Love Calculator ❤️</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298); /* Blue background */
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      padding: 50px 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,255,255,0.4);
+      position: relative;
+      z-index: 10;
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      color: #fff;
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00ffff;
+    }
+
+    input {
+      width: 80%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      text-align: center;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 1.2em;
+      border-radius: 12px;
+      border: none;
+      background: #00ffff;
+      color: #1e3c72;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,255,255,0.5);
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+    }
+
+    #result {
+      margin-top: 25px;
+      font-size: 2em;
+      color: #fff;
+      text-shadow: 0 0 15px #00ffff;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -50px;
+      font-size: 24px;
+      color: #ff2d55;
+      animation: floatUp linear infinite;
+      font-family: 'Pacifico', cursive;
+      text-align: center;
+      pointer-events: none;
+      padding: 4px 8px;
+      border-radius: 12px;
+      background: rgba(255, 0, 128, 0.2);
+      user-select: none;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 0.8; }
+      50% { transform: translateY(-300px) scale(1.2); opacity: 1; }
+      100% { transform: translateY(-600px) scale(0.8); opacity: 0; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>❤️ FLAMES ❤️</h1>
+    <input type="text" id="name1" placeholder="Your Name">
+    <input type="text" id="name2" placeholder="Partner's Name"><br>
+    <button onclick="calculate()">Calculate</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+let hearts = []; // track all floating hearts
+
+// Create a heart element
+function createHeart(name = "") {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.innerText = name ? `❤️ ${name} ❤️` : '❤️';
+
+  heart.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+  heart.style.fontSize = (18 + Math.random() * 12) + 'px';
+  heart.style.animationDuration = (6 + Math.random() * 3) + 's';
+
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 8000); // remove after animation
+  hearts.push(heart);
+}
+
+// Continuously spawn empty hearts at the bottom
+setInterval(() => createHeart(), 600);
+
+// FLAMES calculation
+async function calculate() {
+  const name1 = document.getElementById("name1").value.trim();
+  const name2 = document.getElementById("name2").value.trim();
+  if (!name1 || !name2) {
+    alert("Please enter both names!");
+    return;
+  }
+
+  // Update all existing hearts with new names
+  hearts.forEach((heart, index) => {
+    if (index % 2 === 0) heart.innerText = `❤️ ${name1} ❤️`;
+    else heart.innerText = `❤️ ${name2} ❤️`;
+  });
+
+  // Call backend to calculate FLAMES result
+  const res = await fetch("/calculate", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ name1, name2 })
+  });
+
+  if (res.ok) {
+    const data = await res.json();
+    document.getElementById("result").innerHTML =
+      `💖 ${data.name1} ❤️ ${data.name2} = ${data.result} 💖`;
+  } else {
+    document.getElementById("result").innerText = "Error calculating!";
+  }
+}
+</script>
+
+</body>
+</html>
